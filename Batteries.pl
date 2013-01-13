@@ -24,13 +24,15 @@ use strict;
 use warnings;
 use utf8;
 use 5.010;
-use Acpi::Batteries;
-use Data::Dumper;
+use Acpi::Info::Batteries;
 
-my $batt = Acpi::Batteries->new()->batteries;
+my $batt = Acpi::Info::Batteries->new();
+my $batts = $batt->batteries;
+my $adaptor = $batt->adaptor;
 
-foreach (@$batt) 
+foreach (@$batts) 
 {
-	say $_;
+	say "Battery = $_";
 }
 
+say "Adaptor = $adaptor";

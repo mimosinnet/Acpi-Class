@@ -3,7 +3,7 @@ use 5.010;
 package Acpi::Battery;
 use Acpi::Field;
 use Acpi::Info;
-use Acpi::Batteries;
+use Acpi::Info::Batteries;
 use Acpi::Adaptor;
 use strict;
 
@@ -47,14 +47,12 @@ sub getBatteryState{
 	return (%value);
 }
 
-sub batteryOnLine{
-	my($self) = shift;
-	my($file) = "/sys/class/power_supply/ADP1/uevent";
-
-	my $adaptor = Acpi::Adaptor->new( file => $file );
-
-	my $power_supply_online = $adaptor->online;
-
+sub batteryOnLine
+{
+	my $self = shift;
+	my $ac_adaptor_name = Acpi::Info::Batteries->new()->adaptor; 				
+	my $file = "/sys/class/power_supply/$ac_adaptor_name/uevent";
+	my $power_supply_online = ! Acpi::Adaptor->new( file => $file )->online; 
 	return $power_supply_online;
 }
 
@@ -89,39 +87,48 @@ sub getCharge
 
 sub getLastFullTotal
 {
-	my($self) = shift;
-	my $batts = Acpi::Batteries->new()->batteries;
-	my($lastfulltotal) = undef;
+	my $self = shift;
+	my $batts = Acpi::Info::Batteries->new()->batteries;
+	my $lastfulltotal = undef;
 
 	foreach ( @$batts )
 	{
 		my $path = "/sys/class/power_supply/$_/uevent";
 		my $object = Acpi::Info->new( file => $path);
-		my $value = $object->energy_full;
+		my $value = $object->energy_full || $object->charge_full;
+		if ( $value == 0 ) # avoids division by 0 in getCharge subrutine
+		{
+			warn "
+				WARNING: There is a wrong Battery Energy value reported by $path. 
+				Please, report a bug in case you have a correct value"; 
+			$value = 1;
+		}
 		$lastfulltotal += $value;
 	}
 	return $lastfulltotal;
-
 }
 
 sub getRemainingTotal 
 {
-    my($self) = shift;
-	my $batts = Acpi::Batteries->new()->batteries;
-	my($remainingtotal) = undef;
+    my $self = shift;
+	my $batts = Acpi::Info::Batteries->new()->batteries;
+	my $remainingtotal = undef;
 
 	foreach ( @$batts )
 	{
 		my $path = "/sys/class/power_supply/$_/uevent";
 		my $object = Acpi::Info->new( file => $path);
-		my $value = $object->energy_now;
+		my $value = $object->energy_now || $object->charge_now;
+		warn "
+			WARNING: There is a wrong Battery Energy value reported by $path. 
+			Please, report a bug in case you have a correct value"
+			if $value == 0; 
+
 		$remainingtotal += $value;
 	}
 	
 	return $remainingtotal;
 }
-
-
 
 sub getPresent{
 	my($self) = shift;
@@ -296,7 +303,7 @@ print "Battery offline\n";
 
 =head1 DESCRIPTION
 
-Acpi::Battery is used to have information about your battery.It's specific for GNU/Linux
+Acpi::Battery is used to have information about your battery. It's specific for GNU/Linux
 
 =head1 METHOD DESCRIPTIONS
 
@@ -358,7 +365,7 @@ Return the number of battery present.
 
 getCharge();
 
-Return the pourcentage of the battery.
+Return the percentage of the battery.
 
 =item *
 
