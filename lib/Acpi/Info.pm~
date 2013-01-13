@@ -28,6 +28,8 @@ use 5.010;
     );
 
 	# Information we get from the file transformed in attributes
+	# Some kernel versions use "energy" and others use "charge"
+	
     my @attrs = qw<
         name
         status
@@ -37,9 +39,13 @@ use 5.010;
         voltage_min_design
         voltage_now
 		power_now
+		current_now
         energy_full_design
+		charge_full_design
         energy_full
+		charge_full
         energy_now
+		charge_now
 		capacity
         model_name
         manufacturer

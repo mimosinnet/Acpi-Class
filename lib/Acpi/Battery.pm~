@@ -49,11 +49,12 @@ sub getBatteryState{
 
 sub batteryOnLine
 {
+	# Battery is online if ac adaptor is offline
 	my $self = shift;
 	my $ac_adaptor_name = Acpi::Info::Batteries->new()->adaptor; 				
 	my $file = "/sys/class/power_supply/$ac_adaptor_name/uevent";
-	my $power_supply_online = ! Acpi::Adaptor->new( file => $file )->online; 
-	return $power_supply_online;
+	my $power_supply_online = Acpi::Adaptor->new( file => $file )->online; 
+	return ! $power_supply_online;
 }
 
 sub nbBattery{
