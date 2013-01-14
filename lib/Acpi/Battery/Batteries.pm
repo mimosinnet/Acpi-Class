@@ -18,7 +18,7 @@
 use 5.010;
 use Data::Dumper;
 
-# Get the variables that will be used by the builder subrutines.
+# Get the variables that will be used by the builder subrutines. {{{
 # No sure if this is the right approach
 
 my $dir = "/sys/class/power_supply";
@@ -54,9 +54,9 @@ my $online = do
 	local $/ = <ARGV>;
 };
 chomp $online;
+#}}}
 
-
-{
+{ # Define Moose Attributes {{{
 	package Acpi::Battery::Batteries;
 	use Moose;
 
@@ -84,6 +84,6 @@ chomp $online;
 		my $self = shift;
 		return 1;
 	}
-}
+}#}}}
 
 1;

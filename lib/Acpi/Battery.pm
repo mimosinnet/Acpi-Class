@@ -1,274 +1,170 @@
-use 5.010;
-
 package Acpi::Battery;
+
+# Modules {{{
+use 5.010;
 use Acpi::Field;
 use Acpi::Battery::Values;
 use Acpi::Battery::Batteries;
-use strict;
+use Moose;
+use Data::Dumper;
+#}}}
 
-our $VERSION = '0.1';
+# set version. {{{
+# See: http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
+our $VERSION = "0.200";
+$VERSION = eval $VERSION;
+#}}}
 
-my ($rfield);
+my $batts = Acpi::Battery::Batteries->new();
+my $batteries = $batts->batteries;
+my $online    = $batts->on_line;
+my $attributes =  Acpi::Battery::Values->new()->attributes;
+my $nbats = @$batteries;
 
-sub new{
-	my $class = shift;
-	my $self = {};
+has batts_number => (
+	is => 'ro',
+	isa => 'Str',
+	default => $nbats,
+);
 
-	bless $self,$class;
+has bats_names => (
+	is => 'ro',
+	isa => 'ArrayRef[Str]',
+	default => sub { $batteries },
+);
 
-	$rfield = Acpi::Field->new; 
-	return $self;
-}
-
-sub getBatteryInfo{
-	my($self,$what) = @_;
-	my(%value);
-	my($i) = 0;
-	my($numbatt) = $self->nbBattery;
-
-	for($i=1;$i<=$numbatt;$i++){
-		$value{"BAT".$i} = $rfield->getValueField("/proc/acpi/battery/BAT".$i."/info",$what);
-	}
-
-	return (%value);
-}
-
-sub getBatteryState{
-	my($self,$what)= @_;
-	my(%value);
-	my($i) = 0;
-	my($numbatt) = $self->nbBattery;
-
-	for($i=1;$i<=$numbatt;$i++){
-		$value{"BAT".$i} = $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state",$what);
-	}
-
-	return (%value);
-}
-
-sub batteryOnLine
+my ($energy_full, $energy_now, $capacity);
+foreach my $bat (@$batteries) 
 {
-	# Battery is online if ac adaptor is offline
-	my $self = shift;
-	my $power_supply_online = Acpi::Battery::Batteries->new()->on_line;
-	return ! $power_supply_online;
-}
-
-sub nbBattery{
-	my($self) = shift;
-	my($dir) = "/sys/class/power_supply";
-	my($nb) = 0;
-	
-	opendir(my $battery_dir, $dir) || die "Cannot open $dir : $!";
-	while(readdir($battery_dir)){
-		next unless $_ =~ /BAT/;
-		$nb++;	
-	}
-
-	closedir($battery_dir);
-
-	return $nb;
-}
-
-sub getLastFull{
-	my($self) = shift;
-
-	return $self->getBatteryInfo("last full capacity");
-}
-
-sub getCharge
-{
-	my($self) = shift;
-	my($charge) = sprintf("%.1f",100*$self->getRemainingTotal/$self->getLastFullTotal);
-	return $charge;
-}
-
-sub getLastFullTotal
-{
-	my $self = shift;
-	my $batts = Acpi::Battery::Batteries->new()->batteries;
-	my $lastfulltotal = undef;
-
-	foreach ( @$batts )
+	my $values =  Acpi::Battery::Values->new( file => "/sys/class/power_supply/$bat/uevent" );
+	foreach my $attr (@$attributes)
 	{
-		my $path = "/sys/class/power_supply/$_/uevent";
-		my $object = Acpi::Battery::Values->new( file => $path);
-		my $value = $object->energy_full || $object->charge_full;
-		if ( $value == 0 ) # avoids division by 0 in getCharge subrutine
+		my $value = $values->$attr;
+		my $batt_attribute = $bat . "_" . $attr;
+		has $batt_attribute  => (
+			is => 'ro',
+			isa => 'Str',
+			default => $value,
+		);
+		if ($attr =~ /energy_full$|charge_full$/) 
 		{
-			warn "
-				WARNING: There is a wrong Battery Energy value reported by $path. 
-				Please, report a bug in case you have a correct value"; 
-			$value = 1;
+			$energy_full += $value;
 		}
-		$lastfulltotal += $value;
-	}
-	return $lastfulltotal;
-}
-
-sub getRemainingTotal 
-{
-    my $self = shift;
-	my $batts = Acpi::Battery::Batteries->new()->batteries;
-	my $remainingtotal = undef;
-
-	foreach ( @$batts )
-	{
-		my $path = "/sys/class/power_supply/$_/uevent";
-		my $object = Acpi::Battery::Values->new( file => $path);
-		my $value = $object->energy_now || $object->charge_now;
-		warn "
-			WARNING: There is a wrong Battery Energy value reported by $path. 
-			Please, report a bug in case you have a correct value"
-			if $value == 0; 
-
-		$remainingtotal += $value;
-	}
-	
-	return $remainingtotal;
-}
-
-sub getPresent{
-	my($self) = shift;
-	my(%value);
-	my($i) = 0;
-	my($numbatt) = $self->nbBattery;
-	
-	
-	for($i=1;$i<=$numbatt;$i++){
-		if($rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present") eq "yes"){
-			$value{"BAT".$i} = 0;
+		elsif ($attr =~ /energy_now$|charge_now$/)
+		{
+			$energy_now += $value;
 		}
-		else{
-			$value{"BAT".$i} = -1;
+		elsif ($attr =~ /^capacity$/) {
+			$capacity += $value;
 		}
 	}
-	return (%value);
+	$capacity = $capacity / $nbats;
 }
 
-sub getDesignCapacity{
-	my($self) = shift;
+has energy_full => (
+	is => "ro",
+	isa => "Str",
+	default => $energy_full,
+);
 
-	return $self->getBatteryInfo("design capacity");
-}
+has energy_now => (
+	is => "ro",
+	isa => "Str",
+	default => $energy_now,
+);
 
-sub getBatteryTechnology{
-	my($self) = shift;
-	
-	return $self->getBatteryInfo("battery technology");
-}
+has capacity => (
+	is => "ro",
+	isa => "Str",
+	default => $capacity,
+);
 
-sub getBatteryType{
-	my($self) = shift;
+has ac_online => (
+	is => "ro",
+	isa => "Str",
+	default => $online,
+);
 
-	return $self->getBatteryInfo("battery type");
-}
-
-sub getOEMInfo{
-	my($self) = shift;
-
-	return $self->getBatteryInfo("OEM info");
-}
-
-sub getChargingState{
-	my($self) = shift;
-	my(%value);
-        my($i) = 0;
-	my($numbatt) = $self->nbBattery;
+# You can get charge from capacity
 
 
-	for($i=1;$i<=$numbatt;$i++){
-	        if($rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","charging state") eq "charging"){
-			$value{"BAT".$i} = 0;
-		}
-		else{
-			$value{"BAT".$i} = -1;
-		}
-	}
+#my ($rfield);
+#
+#sub new{
+#	my $class = shift;
+#	my $self = {};
+#
+#	bless $self,$class;
+#
+#	$rfield = Acpi::Field->new; 
+#	return $self;
+#}
+#
 
-	return (%value);
-}
+#
+#sub getRemaining{
+#	my($self) = shift;
+#
+#	return $self->getBatteryState("remaining capacity");
+#}
+#
+#sub getPresentRate{
+#	my($self) = shift;
+#
+#	return $self->getBatteryState("present rate");
+#}
+#
+#sub getPresentRateTotal{
+#        my($self) = shift;
+#	my($presentratetotal) = undef;
+#	my($i) = 0;
+#	my($numbatt) = $self->nbBattery;
+#
+#	for($i=1;$i<=$numbatt;$i++){
+#		$presentratetotal += $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present rate");
+#	}
+#	
+#	return $presentratetotal;					
+#}
+#
+#sub getPresentVoltage{
+#	my($self) = shift;
+#
+#	return $self->getBatteryState("present voltage");
+#}
+#
+#sub getPresentVoltageTotal{
+#	my($self) = shift;
+#	my($presentvoltagetotal) = undef;
+#	my($i) = 0;
+#	my($numbatt) = $self->nbBattery;
+#
+#	for($i=1;$i<=$numbatt;$i++){
+#		$presentvoltagetotal += $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present voltage");
+#	}
+#
+#	return $presentvoltagetotal;
+#}
+#
+#sub getHoursLeft{
+#	my($self) = shift;
+#	
+#	my($hoursleft) = sprintf("%d",$self->getRemainingTotal/$self->getPresentRateTotal);
+#	
+#	return $hoursleft;
+#}
+#
+#sub getMinutesLeft{
+#	my($self) = shift;
+#	my($remaining) = $self->getRemainingTotal;
+#	my($presentrate) = $self->getPresentRateTotal;
+#	my($hoursleft) = sprintf("%d",$self->getHoursLeft);
+#
+#	my($minutesleft) = sprintf("%d",60 * ($remaining - $presentrate * $hoursleft)/$presentrate);
+#
+#	return $minutesleft;
+#}
 
-sub getCapacityState{
-	my($self) = shift;
-	my(%value);
-	my($i) = 0;
-	my($numbatt) = $self->nbBattery;
-
-	for($i=1;$i<=$numbatt;$i++){
-		if($rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","capacity state") eq "ok"){
-			$value{"BAT".$i} = 0;
-		}
-		else{
-			$value{"BAT".$i} = -1;
-		}
-	}
-
-	return (%value);
-}
-
-sub getRemaining{
-	my($self) = shift;
-
-	return $self->getBatteryState("remaining capacity");
-}
-
-sub getPresentRate{
-	my($self) = shift;
-
-	return $self->getBatteryState("present rate");
-}
-
-sub getPresentRateTotal{
-        my($self) = shift;
-	my($presentratetotal) = undef;
-	my($i) = 0;
-	my($numbatt) = $self->nbBattery;
-
-	for($i=1;$i<=$numbatt;$i++){
-		$presentratetotal += $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present rate");
-	}
-	
-	return $presentratetotal;					
-}
-
-sub getPresentVoltage{
-	my($self) = shift;
-
-	return $self->getBatteryState("present voltage");
-}
-
-sub getPresentVoltageTotal{
-	my($self) = shift;
-	my($presentvoltagetotal) = undef;
-	my($i) = 0;
-	my($numbatt) = $self->nbBattery;
-
-	for($i=1;$i<=$numbatt;$i++){
-		$presentvoltagetotal += $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present voltage");
-	}
-
-	return $presentvoltagetotal;
-}
-
-sub getHoursLeft{
-	my($self) = shift;
-	
-	my($hoursleft) = sprintf("%d",$self->getRemainingTotal/$self->getPresentRateTotal);
-	
-	return $hoursleft;
-}
-
-sub getMinutesLeft{
-	my($self) = shift;
-	my($remaining) = $self->getRemainingTotal;
-	my($presentrate) = $self->getPresentRateTotal;
-	my($hoursleft) = sprintf("%d",$self->getHoursLeft);
-
-	my($minutesleft) = sprintf("%d",60 * ($remaining - $presentrate * $hoursleft)/$presentrate);
-
-	return $minutesleft;
-}
 1;
 
 __END__

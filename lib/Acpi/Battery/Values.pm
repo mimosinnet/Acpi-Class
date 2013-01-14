@@ -19,6 +19,7 @@ use 5.010;
 
 {
     package Acpi::Battery::Values;
+	use Acpi::Battery::Attributes;
     use Moose;
 
 	# File from which we get the information
@@ -30,27 +31,15 @@ use 5.010;
 	# Information we get from the file transformed in attributes
 	# Some kernel versions use "energy" and others use "charge"
 	
-    my @attrs = qw<
-		capacity
-		charge_full
-		charge_full_design
-		charge_now
-		cycle_count
-		current_now
-		power_now
-        energy_full
-        energy_full_design
-        energy_now
-        manufacturer
-        model_name
-        name
-        present
-        serial_number
-        status
-        technology
-        voltage_min_design
-        voltage_now
-    >;
+	my $attrs = Acpi::Battery::Attributes->new()->attributes;
+	my @attrs = @$attrs;
+
+	has attributes 	=> (
+		is 			=> 'ro',
+		isa 		=> 'ArrayRef[Str]',
+		default 	=> sub { \@attrs },
+	);	
+
 
     for my $attr (@attrs)
     {
