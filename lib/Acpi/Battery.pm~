@@ -2,9 +2,8 @@ use 5.010;
 
 package Acpi::Battery;
 use Acpi::Field;
-use Acpi::Info;
-use Acpi::Info::Batteries;
-use Acpi::Adaptor;
+use Acpi::Battery::Values;
+use Acpi::Battery::Batteries;
 use strict;
 
 our $VERSION = '0.1';
@@ -51,9 +50,7 @@ sub batteryOnLine
 {
 	# Battery is online if ac adaptor is offline
 	my $self = shift;
-	my $ac_adaptor_name = Acpi::Info::Batteries->new()->adaptor; 				
-	my $file = "/sys/class/power_supply/$ac_adaptor_name/uevent";
-	my $power_supply_online = Acpi::Adaptor->new( file => $file )->online; 
+	my $power_supply_online = Acpi::Battery::Batteries->new()->on_line;
 	return ! $power_supply_online;
 }
 
@@ -89,13 +86,13 @@ sub getCharge
 sub getLastFullTotal
 {
 	my $self = shift;
-	my $batts = Acpi::Info::Batteries->new()->batteries;
+	my $batts = Acpi::Battery::Batteries->new()->batteries;
 	my $lastfulltotal = undef;
 
 	foreach ( @$batts )
 	{
 		my $path = "/sys/class/power_supply/$_/uevent";
-		my $object = Acpi::Info->new( file => $path);
+		my $object = Acpi::Battery::Values->new( file => $path);
 		my $value = $object->energy_full || $object->charge_full;
 		if ( $value == 0 ) # avoids division by 0 in getCharge subrutine
 		{
@@ -112,13 +109,13 @@ sub getLastFullTotal
 sub getRemainingTotal 
 {
     my $self = shift;
-	my $batts = Acpi::Info::Batteries->new()->batteries;
+	my $batts = Acpi::Battery::Batteries->new()->batteries;
 	my $remainingtotal = undef;
 
 	foreach ( @$batts )
 	{
 		my $path = "/sys/class/power_supply/$_/uevent";
-		my $object = Acpi::Info->new( file => $path);
+		my $object = Acpi::Battery::Values->new( file => $path);
 		my $value = $object->energy_now || $object->charge_now;
 		warn "
 			WARNING: There is a wrong Battery Energy value reported by $path. 
