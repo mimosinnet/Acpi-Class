@@ -28,6 +28,7 @@ use Data::Dumper;
 use Acpi::Battery;
 use Acpi::Battery::Values;
 use Acpi::Battery::Batteries;
+use Acpi::Battery::Attributes;
 #}}}
 
 my $battery = Acpi::Battery->new();
@@ -43,7 +44,7 @@ To get the attribute:
 	my $attribute = $batt->BAT_atrribute;
 	say "The value of attribute BAT_attribute is $attribute";';
 
-my $attributes =  Acpi::Battery::Values->new()->attributes;
+my $attributes =  Acpi::Battery::Attributes->new()->attributes;
 my $bat0 = Acpi::Battery::Batteries->new()->batteries->[0];
 say "-" x 50 . "\n The attributes and values of battery $bat0 are: \n" . "-" x 50;
 foreach (@$attributes)
@@ -77,9 +78,10 @@ say "Model name of $bat0 = $model_name";
 say "-" x 50;
 #}}}
 
-say "Information for all batteries: 
-energy_full, energy_now, capacity% ac_online batts_number:";
-my @global_info = qw(energy_full energy_now capacity ac_online batts_number);
+my @global_info = qw(energy_full energy_now capacity ac_online batts_number present);
+say "Information for all batteries: ";
+print "$_ " foreach (@global_info);
+print "\n" . "-" x 40 . "\n";
 foreach (@global_info) 
 {
 	my $value = $battery->$_;
@@ -87,18 +89,3 @@ foreach (@global_info)
 }
 say "-" x 50;
 
-
-exit;
-
-
-if ($battery->batteryOnLine) {
-    say "Battery online";
-    say "Charge: " . $battery->getCharge."% "; 
-}
-
-else{
-
-	say "Battery offline";
-    say "Charge: " . $battery->getCharge."% "; 
-
-}
