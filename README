@@ -1,1 +1,3 @@
 Rewritting of the Perl Acpi::Battery distribution 
+
+Although this code although it works, it is still work in progress. The code is ugly and needs many improvements. Some implementation is clearly wrong. Please, let me know if you have some improvements or suggestions.

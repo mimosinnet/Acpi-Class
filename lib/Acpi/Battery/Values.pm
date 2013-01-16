@@ -1,20 +1,4 @@
-#
-#===============================================================================
-#
-#         FILE: Values.pm
-#
-#  DESCRIPTION: Getting Battery Values
-#
-#        FILES: ---
-#         BUGS: ---
-#        NOTES: Derived from tobyink, http://www.perlmonks.org/?node_id=1012996 
-#       AUTHOR: tobyink, mimosinnet
-# ORGANIZATION: Associació Cultural Ningún Lugar
-#      VERSION: 1.0
-#      CREATED: 12/01/13 12:03:51
-#     REVISION: ---
-#===============================================================================
-
+# Values of the attributes foreach battery
 use 5.010;
 
 {
@@ -22,7 +6,7 @@ use 5.010;
 	use Acpi::Battery::Attributes;
     use Moose;
 
-	# File from which we get the information
+	# The values are obtained from /sys/class/power_supply/$BAT/uevent 
 	has file => (
         is  => "ro",
         isa => "Str",
@@ -33,14 +17,6 @@ use 5.010;
 	
 	my $attrs = Acpi::Battery::Attributes->new()->attributes;
 	my @attrs = @$attrs;
-
-	has attributes 	=> (
-		is 			=> 'ro',
-		isa 		=> 'ArrayRef[Str]',
-		default 	=> sub { \@attrs },
-	);	
-
-
     for my $attr (@attrs)
     {
         has $attr => (

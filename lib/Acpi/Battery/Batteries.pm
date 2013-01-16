@@ -16,7 +16,6 @@
 #===============================================================================
 
 use 5.010;
-use Data::Dumper;
 
 # Get the variables that will be used by the builder subrutines. {{{
 # No sure if this is the right approach

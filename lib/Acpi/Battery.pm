@@ -5,6 +5,7 @@ use 5.010;
 use Acpi::Field;
 use Acpi::Battery::Values;
 use Acpi::Battery::Batteries;
+use Acpi::Battery::Attributes;
 use Moose;
 use Data::Dumper;
 #}}}
@@ -18,7 +19,7 @@ $VERSION = eval $VERSION;
 my $batts = Acpi::Battery::Batteries->new();
 my $batteries = $batts->batteries;
 my $online    = $batts->on_line;
-my $attributes =  Acpi::Battery::Values->new()->attributes;
+my $attributes =  Acpi::Battery::Attributes->new()->attributes;
 my $nbats = @$batteries;
 
 has batts_number => (
@@ -33,7 +34,7 @@ has bats_names => (
 	default => sub { $batteries },
 );
 
-my ($energy_full, $energy_now, $capacity);
+my ($energy_full, $energy_now, $capacity, $present);
 foreach my $bat (@$batteries) 
 {
 	my $values =  Acpi::Battery::Values->new( file => "/sys/class/power_supply/$bat/uevent" );
@@ -46,19 +47,13 @@ foreach my $bat (@$batteries)
 			isa => 'Str',
 			default => $value,
 		);
-		if ($attr =~ /energy_full$|charge_full$/) 
-		{
-			$energy_full += $value;
-		}
-		elsif ($attr =~ /energy_now$|charge_now$/)
-		{
-			$energy_now += $value;
-		}
-		elsif ($attr =~ /^capacity$/) {
-			$capacity += $value;
-		}
+		if 	  ($attr =~ /energy_full$|charge_full$/) 	{ $energy_full += $value; }
+		elsif ($attr =~ /energy_now$|charge_now$/) 		{ $energy_now += $value;  }
+		elsif ($attr =~ /^capacity$/) 					{ $capacity += $value;    }
+		elsif ($attr =~ /^present$/ )					{ $present += $value;     }
 	}
 	$capacity = $capacity / $nbats;
+	$capacity = 100 * $energy_now / $energy_full unless $capacity > 0;
 }
 
 has energy_full => (
@@ -85,85 +80,15 @@ has ac_online => (
 	default => $online,
 );
 
-# You can get charge from capacity
+has present => (
+	is => "ro",
+	isa => "Str",
+	default => $present,
+);
 
-
-#my ($rfield);
-#
-#sub new{
-#	my $class = shift;
-#	my $self = {};
-#
-#	bless $self,$class;
-#
-#	$rfield = Acpi::Field->new; 
-#	return $self;
-#}
-#
-
-#
-#sub getRemaining{
-#	my($self) = shift;
-#
-#	return $self->getBatteryState("remaining capacity");
-#}
-#
-#sub getPresentRate{
-#	my($self) = shift;
-#
-#	return $self->getBatteryState("present rate");
-#}
-#
-#sub getPresentRateTotal{
-#        my($self) = shift;
-#	my($presentratetotal) = undef;
-#	my($i) = 0;
-#	my($numbatt) = $self->nbBattery;
-#
-#	for($i=1;$i<=$numbatt;$i++){
-#		$presentratetotal += $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present rate");
-#	}
-#	
-#	return $presentratetotal;					
-#}
-#
-#sub getPresentVoltage{
-#	my($self) = shift;
-#
-#	return $self->getBatteryState("present voltage");
-#}
-#
-#sub getPresentVoltageTotal{
-#	my($self) = shift;
-#	my($presentvoltagetotal) = undef;
-#	my($i) = 0;
-#	my($numbatt) = $self->nbBattery;
-#
-#	for($i=1;$i<=$numbatt;$i++){
-#		$presentvoltagetotal += $rfield->getValueField("/proc/acpi/battery/BAT".$i."/state","present voltage");
-#	}
-#
-#	return $presentvoltagetotal;
-#}
-#
-#sub getHoursLeft{
-#	my($self) = shift;
-#	
-#	my($hoursleft) = sprintf("%d",$self->getRemainingTotal/$self->getPresentRateTotal);
-#	
-#	return $hoursleft;
-#}
-#
-#sub getMinutesLeft{
-#	my($self) = shift;
-#	my($remaining) = $self->getRemainingTotal;
-#	my($presentrate) = $self->getPresentRateTotal;
-#	my($hoursleft) = sprintf("%d",$self->getHoursLeft);
-#
-#	my($minutesleft) = sprintf("%d",60 * ($remaining - $presentrate * $hoursleft)/$presentrate);
-#
-#	return $minutesleft;
-#}
+# Things to do:
+# - Remaining capacity
+# - Tiem left
 
 1;
 
@@ -177,27 +102,29 @@ Acpi::Battery - A class to get informations about your battery.
 
 use Acpi::Battery;
 
-$battery = Acpi::Battery->new;
+my $battery = Acpi::Battery->new;
 
-if($battery->batteryOnLine == 0){
-
-	print "Battery online\n";
-	
-	print $battery->getCharge."\n"; 
-	
-	print "Time remaining ".$batteyr->getHoursLeft.":".$battery->getMinutesLeft."\n";
-
+if ( $battery->ac_online == 0 and $battery->present == 1 )
+{
+	say "Ac on and battery in use ";
+	say "Energy/power now = ". $battery->energy_now ; 
+	say "Capacity " . $battery->capacity ." %";	
 }
-
-else{
-
-print "Battery offline\n";
-
+elsif ($battery->present)
+{
+	say "Battery in use";
+	say "Energy/power now = ". $battery->energy_now ; 
+	say "Capacity " . $battery->capacity ." %";	
+}
+	else
+{
+	say "Battery not present";
 }
 
 =head1 DESCRIPTION
 
-Acpi::Battery is used to have information about your battery. It's specific for GNU/Linux
+Acpi::Battery is used to have information about your battery. It's specific for GNU/Linux. 
+It uses the information in /sys/class/power_supply.
 
 =head1 METHOD DESCRIPTIONS
 
