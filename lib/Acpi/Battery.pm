@@ -17,21 +17,22 @@ $VERSION = eval $VERSION;
 #}}}
 
 my $batts = Acpi::Battery::Batteries->new();
+
 my $batteries = $batts->batteries;
 my $online    = $batts->on_line;
 my $attributes =  Acpi::Battery::Attributes->new()->attributes;
 my $nbats = @$batteries;
 
+has bats_names => (
+	is => 'ro',
+	isa => 'ArrayRef[Str]',
+	default => sub { $batts->batteries },
+);
+
 has batts_number => (
 	is => 'ro',
 	isa => 'Str',
 	default => $nbats,
-);
-
-has bats_names => (
-	is => 'ro',
-	isa => 'ArrayRef[Str]',
-	default => sub { $batteries },
 );
 
 my ($energy_full, $energy_now, $capacity, $present);
@@ -88,13 +89,13 @@ has present => (
 
 # Things to do:
 # - Remaining capacity
-# - Tiem left
+# - Time left
 
 1;
 
 __END__
 
-=head1 NAME
+=head1 NAME 
 
 Acpi::Battery - A class to get informations about your battery.
 
@@ -126,165 +127,59 @@ elsif ($battery->present)
 Acpi::Battery is used to have information about your battery. It's specific for GNU/Linux. 
 It uses the information in /sys/class/power_supply.
 
-=head1 METHOD DESCRIPTIONS
+=head1 ATTRIBUTES
 
-This sections contains only the methods in Battery.pm itself.
+The attributes of Acpi::Battery are obtained from the values in the directory F</sys/class/power_supply/>.
+Because these values may change, the attributes will also vary. The attributes of your first battery can
+be obtained with the following code:
 
-=over
+my $attributes =  Acpi::Battery::Attributes->new()->attributes;
 
-=item *
+my $bat0 = Acpi::Battery::Batteries->new()->batteries->[0];
 
-new();
+say "-" x 50 . "\n The attributes and values of battery $bat0 are: \n" . "-" x 50;
 
-Contructor for the class
+foreach (@$attributes)
 
-=item *
+{
 
-getBatteryInfo();
+    my $att = $bat0 . "_" . $_;
 
-Return a hash composed by the name of the battery and the information find in /proc/acpi/battery/BATX/info.
+    my $value = $battery->$att;
 
-Takes 1 arg :
+    say "Attribute $_ = $value";
 
-=over
+}
 
-=item 0
+say "-" x 50;
 
-The information that you would find !!
+Acpi::Battery also provides these attributes for all connected batteries:
+
+=over 
+
+=item * energy_full:	total energy / charge
+
+=item * energy_now:  	present energy / charge
+
+=item * capacity		total capacity in %
+
+=item * ac_online		if the computer is plug in
+
+=item * batts_number	number of batteries
+
+=item * present     	if any of the batteries is present.
 
 =back
 
-=item *
+=head1 METHODS
 
-getBatteryState();
+Acpi::Battery only provides the object constructor method new:
 
-Return a hash composed by the name of the battery and the information find in /proc/acpi/battery/BATX/state.
+my $batt = Acpi::Battery->new();
 
-Takes 1 arg :
+=head1 DEVELOPERS
 
-=over
-
-=item 0
-
-The information that you would find !!
-
-=back
-
-=item *
-
-batteryOnLine();
-
-Return 0 if the battery is online else -1.
-
-=item *
-
-nbBattery();
-
-Return the number of battery present.
-
-=item *
-
-getCharge();
-
-Return the percentage of the battery.
-
-=item *
-
-getHoursLeft();
-
-Return the hours left behind the battery will be down.
-
-=item *
-
-getMinutesLeft();
-
-Return the minutes left behind the battery will be down.
-
-=item * 
-
-getLastFull();
-
-Return a hash composed by the name of the battery and the last full capacity.
-
-=item *
-
-getLastFullTotal();
-
-Return the last full capacity of all batteries.
-
-=item *
-
-getPresent();
-
-Return a hash composed by the name of the battery and 0 or -1 if it's present or not.
-
-=item *
-
-getDesignCapacity();
-
-Return a hash composed by the name of the battery and the design capacity.
-
-=item *
-
-getBatteryTechnology();
-
-Return a hash composed by the name of the battery and the technology.
-
-=item *
-
-getBatteryType();
-
-Return a hash composed by the name of the battery and the type.
-
-=item *
-
-getOEMInfo();
-
-Return a hash composed by the name of the battery and the oem info.
-
-=item *
-
-getChargingState();
-
-Return a hash composed by the name of the battery and 0 or -1 if it's charging or not.
-
-=item *
-
-getCapacityState();
-
-Return a hash composed by the name of the battery and 0 or -1 if if the capacity state is ok or not.
-
-=item *
-
-getRemainingTotal();
-
-Return the remaining capacity of all batteries.
-
-=item * 
-
-getPresentRateTotal();
-
-Return the present rate of all batteries.
-
-=item *
-
-getPresentVoltageTotal();
-
-Return the present voltage of all batteries.
-
-=over
-
-=back
-
-=head1 AUTHORS
-
-=over
-
-=item *
-
-Developed by Shy <shy@cpan.org>.
-
-=back
+Version 0.1 was developed by Shy <shy@cpan.org>, and has been rewritten by Mimosinnet <mimosinet@cpan.org>.
 
 =cut
 
