@@ -16,12 +16,29 @@ our $VERSION = "0.200";
 $VERSION = eval $VERSION;
 #}}}
 
-my $batts = Acpi::Battery::Batteries->new();
+has battery => (
+	is => 'ro',
+	isa => 'Str',
+);
 
+my $batts = Acpi::Battery::Batteries->new();
 my $batteries = $batts->batteries;
 my $online    = $batts->on_line;
 my $attributes =  Acpi::Battery::Attributes->new()->attributes;
 my $nbats = @$batteries;
+
+my $bat = "BAT1";
+my $values =  Acpi::Battery::Values->new( file => "/sys/class/power_supply/$bat/uevent" );
+foreach my $attr (@$attributes)
+{
+	my $value = $values->$attr;
+	my $batt_attribute = $bat . "_" . $attr;
+	has $batt_attribute  => (
+		is => 'ro',
+		isa => 'Str',
+		default => $value,
+	);
+}
 
 has bats_names => (
 	is => 'ro',
