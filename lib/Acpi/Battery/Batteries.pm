@@ -15,57 +15,37 @@
 #     REVISION: ---
 #===============================================================================
 
-package Acpi::Battery::Batteries;
+package Acpi::Battery::Batteries;#{{{
 use 5.010;
 use Moose;
-use namespace::autoclean;
+use namespace::autoclean;#}}}
 
-# Define Attributes {{{
-has dir => (
+has dir => (#{{{
 	is => 'ro',
 	isa => 'Str',
 	default => '/sys/class/power_supply',
-);
+);#}}}
 
-has batteries => (
+has batteries => (#{{{
 	is => 'ro',
 	isa => 'ArrayRef[Str]',
 	lazy => 1,
 	builder => '_batteries',
-);
+);#}}}
 
-has adaptor => (
+has batts_number => (	#{{{
+	is => 'ro',
+	isa => 'Str',
+	lazy => 1,
+	default => sub { my $self = shift; $self->_batts_number },
+);#}}}
+
+has adaptor => (#{{{
 	is => 'ro',
 	isa => 'Str',
 	lazy => 1,
 	builder => '_adaptor',
 );
-
-has on_line => (
-	is => 'ro',
-	isa => 'Bool',
-	lazy => 1,
-	builder => '_online',
-);
-#}}}
-
-# Define builders {{{
-sub _batteries 
-{
-	my $self = shift;
-	my $dir = $self->dir;
-
-	opendir(my $power_supply_dir, $dir) or die "Cannot open $dir : $!";
-	my @bats;
-	while(readdir($power_supply_dir))
-	{
-		push @bats, $_ if ($_ =~ /BAT/);
-	}
-	closedir($power_supply_dir);
-
-	die "No batteries found" unless (scalar @bats > 0);
-	return \@bats;
-}
 
 sub _adaptor 
 {
@@ -85,11 +65,19 @@ sub _adaptor
 		Please, fill a bug with the contents of the $dir directory
 
 	" unless defined $adaptor; 
-	say $adaptor;
 	return $adaptor;
 }
 
-sub _online 
+#}}}
+
+has on_line => (#{{{
+	is => 'ro',
+	isa => 'Bool',
+	lazy => 1,
+	builder => '_online',
+);
+
+sub _online
 {
 	my $self = shift;
 	my $adaptor = $self->adaptor;
@@ -102,7 +90,36 @@ sub _online
 	chomp $online;
 	return $online;
 }
+
 #}}}
+
+sub _batteries #{{{
+{
+	my $self = shift;
+	my $dir = $self->dir;
+
+	opendir(my $power_supply_dir, $dir) or die "Cannot open $dir : $!";
+	my @bats;
+	while(readdir($power_supply_dir))
+	{
+		push @bats, $_ if ($_ =~ /BAT/);
+	}
+	closedir($power_supply_dir);
+
+	die "No batteries found" unless (scalar @bats > 0);
+	return \@bats;
+}#}}}
+
+sub _batts_number		#{{{
+{
+	my $self = shift;
+	my $batts_names = $self->batteries;
+	my $batts_number = @$batts_names;
+	chomp $batts_number;
+	return $batts_number;
+}#}}}
+
+
 
 __PACKAGE__->meta->make_immutable;
 

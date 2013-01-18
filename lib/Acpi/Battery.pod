@@ -1,0 +1,77 @@
+=head1 NAME 
+
+Acpi::Battery - Gives the values of your battery attributes.
+
+
+=head1 SYNOPSIS
+
+  my $ac_online           = Acpi::Battery::Batteries->new->on_line;
+  my $battery             = Acpi::Battery->new;
+  my $battery_present     = $battery->global_values("present");
+  my $battery_energy_now  = $battery->global_values("energy_now");
+  my $battery_capacity    = $battery->global_values("capacity");
+
+  if ( $ac_online == 1 and $battery_present == 1 ) {
+    say "Ac on and battery in use ";
+    say "Energy now = ". $battery_energy_now ; 
+    say "Capacity " . $battery_capacity ." %";  
+  } elsif ($battery_present) {
+    say "Battery in use";
+    say "Energy now = ". $battery_energy_now ; 
+    say "Capacity " . $battery_capacity ." %";  
+  } else { say "Battery not present"; } 
+
+
+=head1 DESCRIPTION
+
+Acpi::Battery is used to have information about your battery. It's specific for GNU/Linux, and gives similar information that tha command 'upower' using the information in F</sys/class/power_supply>. It has the following subclasses:
+
+  - Acpi::Battery::Batteries : Information on Batteries 
+  - Acpi::Battery::Attributes: List of attributes 
+  - Acpi::Battery::Values    : Infomation on a particular battery
+
+=head1 ATTRIBUTES
+
+The attributes of Acpi::Battery are obtained from the values in the directory F</sys/class/power_supply/>.
+Because these values may change, the attributes will also vary. The attributes of your first battery can
+be obtained with the following code:
+
+    # Get the attributes:
+    my $attributes =  Acpi::Battery::Attributes->new()->attributes;
+    # Name of the first battery:
+    my $bat0 = Acpi::Battery::Batteries->new()->batteries->[0];
+    say "-" x 50 . "\n The attributes and values of battery $bat0 are: \n" . "-" x 50;
+    foreach my $attribute (@$attributes)
+    {
+        my $value = $battery->$attribute;
+        say "Attribute $attribute = $value";
+    } 
+
+
+=head1 METHODS
+
+Acpi::Battery provides the following methods:
+
+=head2 new
+
+object constructor.
+
+=head2 global_values($attribute)
+
+Gives the total value or all batteries present for a particular attribute. It adds the values except:
+
+	- capacity: gives the mean of the capacity of the batteries present
+	- present : gives 1 if any of the batteries is present
+
+Example:
+
+	my $battery 	= Acpi::Battery->new;
+	my $energy_now 	= $battery->global_values("energy_now");
+	my $capacity   	= $battery->global_values("capacity");
+
+=head1 DEVELOPERS
+
+Version 0.1 was developed by Shy <shy@cpan.org>, and has been rewritten by Mimosinnet <mimosinet@cpan.org>.
+
+=cut
+

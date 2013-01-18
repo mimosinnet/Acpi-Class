@@ -2,21 +2,23 @@
 package Acpi::Battery::Values;
 use 5.010;
 use Acpi::Battery::Attributes;
+use Acpi::Battery::Batteries;
 use Moose;
+use Data::Dumper;
 
 use namespace::autoclean;
 
 
 # The values are obtained from /sys/class/power_supply/$BAT/uevent 
-has file => (
+has battery => (
 	is  => "ro",
 	isa => "Str",
+	default => Acpi::Battery::Batteries->new()->batteries->[0],
 );
 
 # Information we get from the file transformed in attributes
 my $attrs = Acpi::Battery::Attributes->new()->attributes;
-my @attrs = @$attrs;
-for my $attr (@attrs)
+for my $attr (@$attrs)
 {
 	has $attr => (
 		is      => "ro",
@@ -42,7 +44,9 @@ has _data => (
 
 sub _build_data {
 	my $self    = shift;
-	local @ARGV = $self->file;
+	my $BAT 	= $self->battery;
+	my $file 	= "/sys/class/power_supply/$BAT/uevent";
+	local @ARGV = $file;
 	local $/    = <ARGV>;
 }
 
