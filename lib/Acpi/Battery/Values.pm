@@ -6,7 +6,7 @@ use Acpi::Battery::Batteries;
 use Moose;
 use Data::Dumper;
 
-use namespace::autoclean;
+# use namespace::autoclean;
 
 
 # The values are obtained from /sys/class/power_supply/$BAT/uevent 
@@ -16,8 +16,10 @@ has battery => (
 	default => Acpi::Battery::Batteries->new()->batteries->[0],
 );
 
+#test 
+my $attrs = Acpi::Battery::Attributes->new->{attributes};
+
 # Information we get from the file transformed in attributes
-my $attrs = Acpi::Battery::Attributes->new()->attributes;
 for my $attr (@$attrs)
 {
 	has $attr => (

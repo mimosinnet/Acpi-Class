@@ -9,7 +9,7 @@ use Acpi::Battery::Attributes;
 use Moose;
 #}}}
 
-use namespace::autoclean;
+# use namespace::autoclean;
 
 # set version. {{{
 # See: http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/

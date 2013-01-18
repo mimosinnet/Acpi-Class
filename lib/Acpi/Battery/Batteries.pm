@@ -1,24 +1,11 @@
-#
 #===============================================================================
-#
-#         FILE: Batteries.pm
-#
 #  DESCRIPTION: Get an ArrayRef of battery names and name of adaptor
-#
-#        FILES: ---
-#         BUGS: ---
-#        NOTES: ---
-#       AUTHOR: mimosinnet (), 
-# ORGANIZATION: Associació Cultural Ningún Lugar
-#      VERSION: 1.0
-#      CREATED: 12/01/13 13:23:14
-#     REVISION: ---
 #===============================================================================
 
 package Acpi::Battery::Batteries;#{{{
 use 5.010;
 use Moose;
-use namespace::autoclean;#}}}
+# use namespace::autoclean;#}}}
 
 has dir => (#{{{
 	is => 'ro',

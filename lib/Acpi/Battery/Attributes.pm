@@ -2,14 +2,15 @@
 package Acpi::Battery::Attributes;
 use 5.010;
 use Acpi::Battery::Batteries;
-use Moose;
-use namespace::autoclean;
 
-has attributes => (
-	is  => "ro",
-	isa => "ArrayRef[Str]",
-	builder => '_attributes',
-);
+sub new
+{
+	my $class = shift;
+	my $self = _attributes() ;
+	bless $self, $class;
+
+	return $self;
+}
 
 sub _attributes
 {
@@ -26,9 +27,7 @@ sub _attributes
 
 	my @attrs = $content =~ /^POWER_SUPPLY_(\w+)=.*/mg;
 	my @attributes = map lc($_), @attrs;
-	return \@attributes;
+	return { attributes => \@attributes };
 }
-
-__PACKAGE__->meta->make_immutable;
 
 1;
