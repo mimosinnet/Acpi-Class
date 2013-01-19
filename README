@@ -1,8 +1,7 @@
 Rewritting of the Perl Acpi::Battery distribution 
 
-Although this code works, it is still work in progress. It is a rewritting of
-the CPAN Acpi::Battery because the module uses the deprecated directory
-/proc/acpi/battery/ to get the battery information. 
+This is a rewritting of the CPAN Acpi::Battery. The module the deprecated
+directory /proc/acpi/battery/ to get the battery information. 
 
 Please, let me know if you have some improvements or suggestions.
 
