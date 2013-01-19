@@ -5,22 +5,16 @@ package Acpi::Battery::Values;
 use 5.010;
 use strict;
 use warnings;
-use feature 'state';
-use Data::Dumper;
+use Acpi::Battery::Batteries;
 #}}}
 
 sub new {#{{{
 	my $class = shift;
-	state $instance;
-
-	if (! defined $instance ) 
-	{
-		my $self = {
-			'default_battery' 	=> Acpi::Battery::Batteries->new->batteries->[0],
-		};
-		$instance = bless $self, $class;
-	}
-	return $instance;
+	my $self = {
+		'default_battery' 	=> Acpi::Battery::Batteries->new->batteries->[0],
+	};
+	bless $self, $class;
+	return $self;
 }#}}}
 
 sub values #{{{
