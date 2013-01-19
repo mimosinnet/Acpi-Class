@@ -8,10 +8,10 @@ use 5.010;
 use Acpi::Battery::Batteries;
 use Test::More;
 
-my $batt = Acpi::Battery::Batteries->new();
+my $batt = Acpi::Battery::Batteries->new;
 my $batts = $batt->batteries;
 my $adaptor = $batt->adaptor;
-my $online = $batt->on_line;
+my $online = $batt->online;
 
 ok ( $adaptor  =~ /\w/, "The ac_adaptor is: $adaptor" );
 ok ( $online =~ /[01]/, "The online status of $adaptor is $online " );

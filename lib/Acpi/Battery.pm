@@ -2,14 +2,12 @@ package Acpi::Battery;
 
 # Modules {{{
 use 5.010;
-use Acpi::Field;
-use Acpi::Battery::Values;
+use strict;
+use warnings;
 use Acpi::Battery::Batteries;
 use Acpi::Battery::Attributes;
-use Moose;
+use Acpi::Battery::Values;
 #}}}
-
-# use namespace::autoclean;
 
 # set version. {{{
 # See: http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
@@ -17,28 +15,28 @@ our $VERSION = "0.200";
 $VERSION = eval $VERSION;
 #}}}
 
-has battery => (#{{{
-	is 		=> 'ro',
-	isa 	=> 'Str',
-	default => Acpi::Battery::Batteries->new->batteries->[0],
-);#}}}
+sub new {#{{{
+	my $class = shift;
+	my $batteries = Acpi::Battery::Batteries->new;
+	my $self = {
+		'batteries'			=> $batteries->batteries,
+		'bats_number'		=> $batteries->batts_number,
+		'adpator'			=> $batteries->adaptor,
+		'online'			=> $batteries->online,
+		'default_battery' 	=> $batteries->batteries->[0],
+		'attributes'	  	=> Acpi::Battery::Attributes::attributes(),
+	};
+	bless $self, $class;
+	return $self;
+}#}}}
 
-# Defines battery atrributes: {{{
-my $attrs = Acpi::Battery::Attributes->new->attributes;
-foreach my $attr (@$attrs)
+sub value 							# get value of a battery attribute {{{
 {
-	has $attr  	=> (
-		is 		=> 'ro',
-		isa 	=> 'Str',
-		lazy 	=> 1,
-		default => sub { my $self = shift; $self->_get_attribute($attr) },
-	);
-}
-
-sub _get_attribute {
-	my ($self, $attr) 	= @_;
-	my $BAT				= $self->battery;       # The battery we get the attribute from
-	my $value			= Acpi::Battery::Values->new( battery => $BAT )->$attr;
+	my ($self, $attribute) = @_;
+	my $BAT 	= $self->{battery};
+	$BAT 	||= $self->{default_battery};
+	my $battery = Acpi::Battery::Values->new( battery => $BAT);
+	my $value 	= $battery->values->{$attribute};
 	return $value;
 }#}}}
 
@@ -53,7 +51,7 @@ sub global_values 					# Gives a global value for all batteries {{{
 	my $total_value;
 	foreach my $bat (@$batteries_names) 
 	{
-		my $value = Acpi::Battery::Values->new( battery => $bat )->$attribute;
+		my $value = Acpi::Battery::Values->new( battery => $bat )->values->{$attribute};
 		$total_value += $value;
 	}
 
@@ -68,8 +66,6 @@ sub global_values 					# Gives a global value for all batteries {{{
 
 	return $total_value;
 }#}}}
-
-__PACKAGE__->meta->make_immutable;
 
 # Things to do:
 # - Remaining capacity

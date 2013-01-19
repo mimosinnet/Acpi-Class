@@ -14,19 +14,17 @@ use utf8;
 use 5.010;
 use Acpi::Battery::Values;
 use Acpi::Battery::Batteries;
-use Data::Dumper;
 # }}}
 
 # Define Variables {{{
-my $bat = Acpi::Battery::Batteries->new()->batteries->[0];		# Name of first Battery 
-my $uevent_file = "/sys/class/power_supply/$bat/uevent";
-my $acpi_values = Acpi::Battery::Values->new(file => $uevent_file );
+my $bat = Acpi::Battery::Batteries->new->batteries->[0];		# Name of first Battery 
+my $acpi_values = Acpi::Battery::Values->new( battery => $bat );
 #}}}
 
 # Get the parameters of the first battery from uevent_file {{{
 my $values = do                              	# Read the file 
 {
-    local @ARGV = $uevent_file;
+    local @ARGV = "/sys/class/power_supply/$bat/uevent";
     local $/    = <ARGV>;
 };
 
@@ -39,7 +37,7 @@ foreach ( split /\n/, $values )
 # }}}
 
 # Test 1: see if we can get the battery name {{{
-my $b = $acpi_values->model_name;
+my $b = $acpi_values->values->{'model_name'};
 
 ok ( $b =~ /\w/, "Battery name: $b");
 # }}}
@@ -47,8 +45,8 @@ ok ( $b =~ /\w/, "Battery name: $b");
 # Tests: see if the parameters of battery are attributes of object Acpi::Battery::Values {{{
 foreach ( @file_parameters )
 {
-	eval { my $parameter = $acpi_values->$_; };
-	ok ( $@ eq "", "Definition of the attribute '$_' in the object Acpi::Battery::Values" );
+	eval { my $parameter = $acpi_values->values->{$_}; };
+	ok ( $@ eq "", "The attribute '$_' does not give an error in the method: Acpi::Battery::Values::values" );
 }
 # }}}
 

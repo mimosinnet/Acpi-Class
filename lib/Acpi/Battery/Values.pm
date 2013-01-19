@@ -1,57 +1,46 @@
 # Values of the attributes for a particlar battery
 package Acpi::Battery::Values;
+
+# use modules {{{
 use 5.010;
-use Acpi::Battery::Attributes;
-use Acpi::Battery::Batteries;
-use Moose;
+use strict;
+use warnings;
+use feature 'state';
 use Data::Dumper;
+#}}}
 
-# use namespace::autoclean;
+sub new {#{{{
+	my $class = shift;
+	state $instance;
 
+	if (! defined $instance ) 
+	{
+		my $self = {
+			'default_battery' 	=> Acpi::Battery::Batteries->new->batteries->[0],
+		};
+		$instance = bless $self, $class;
+	}
+	return $instance;
+}#}}}
 
-# The values are obtained from /sys/class/power_supply/$BAT/uevent 
-has battery => (
-	is  => "ro",
-	isa => "Str",
-	default => Acpi::Battery::Batteries->new()->batteries->[0],
-);
-
-#test 
-my $attrs = Acpi::Battery::Attributes->new->{attributes};
-
-# Information we get from the file transformed in attributes
-for my $attr (@$attrs)
+sub values #{{{
 {
-	has $attr => (
-		is      => "ro",
-		lazy    => 1,
-		default => sub { my $self = shift; $self->_build($attr) }
-	);
-}
+	my $self = shift;
+	my $battery = $self->{battery};
+	$battery ||= $self->{default_battery};
+	my $uevent = "/sys/class/power_supply/$battery/uevent";
+	my $content = do {
+		local @ARGV = $uevent;
+		local $/    = <ARGV>;
+	};
 
-sub _build
-{
-	my ($self, $key) = @_;
-	my $data = $self->_data;
-	$key = "POWER_SUPPLY_" . uc($key);
-	$data =~ /^$key=(.+?)$/m and $1;
-}
-
-has _data => (
-	is       => "ro",
-	isa      => "Str",
-	lazy     => 1,
-	builder  => '_build_data',
-);
-
-sub _build_data {
-	my $self    = shift;
-	my $BAT 	= $self->battery;
-	my $file 	= "/sys/class/power_supply/$BAT/uevent";
-	local @ARGV = $file;
-	local $/    = <ARGV>;
-}
-
-__PACKAGE__->meta->make_immutable;
+	my %values = $content =~ /^POWER_SUPPLY_(\w+)=(.+)$/mg;
+	foreach my $key (keys %values) 
+	{
+		my $newkey = lc $key;
+		$values{$newkey} = delete $values{$key};
+	}
+	return \%values;
+}#}}}
 
 1;

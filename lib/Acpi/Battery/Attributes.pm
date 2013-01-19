@@ -1,18 +1,11 @@
 # Attributes that the battery recognises
 package Acpi::Battery::Attributes;
+use strict;
+use warnings;
 use 5.010;
 use Acpi::Battery::Batteries;
 
-sub new
-{
-	my $class = shift;
-	my $self = _attributes() ;
-	bless $self, $class;
-
-	return $self;
-}
-
-sub _attributes
+sub attributes
 {
 	my $self = shift;
 	# The parameters of both batteries should be the same
@@ -27,7 +20,7 @@ sub _attributes
 
 	my @attrs = $content =~ /^POWER_SUPPLY_(\w+)=.*/mg;
 	my @attributes = map lc($_), @attrs;
-	return { attributes => \@attributes };
+	return \@attributes;
 }
 
 1;
