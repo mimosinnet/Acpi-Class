@@ -7,7 +7,6 @@ use warnings;
 use Acpi::Battery::Batteries;
 use Acpi::Battery::Attributes;
 use Acpi::Battery::Values;
-use Data::Dumper;
 #}}}
 
 # set version. {{{
@@ -35,7 +34,7 @@ sub value 							# get value of a battery attribute {{{
 {
 	my ($self, $attribute) = @_;
 	#--- Check if attribute exist
-	my $attributes = $self->{'attributes'};
+	my $attributes = $self->{attributes};
 	my %param = map { $_ => 1 } @$attributes;
 	die "The provided attribute does not exist" unless exists $param{$attribute};
 	#---

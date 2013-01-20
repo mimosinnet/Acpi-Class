@@ -12,7 +12,6 @@ use feature 'state';
 use Data::Dumper;
 # }}}
 
-
 sub new {#{{{
 	my $class = shift;
 	state $instance;
