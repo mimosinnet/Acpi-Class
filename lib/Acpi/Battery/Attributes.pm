@@ -7,7 +7,6 @@ use Acpi::Battery::Batteries;
 
 sub attributes
 {
-	my $self = shift;
 	# The parameters of both batteries should be the same
 	my $bat = Acpi::Battery::Batteries->new()->batteries->[0];
 	my $file = "/sys/class/power_supply/$bat/uevent";
