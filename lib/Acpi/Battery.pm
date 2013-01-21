@@ -20,7 +20,7 @@ sub new {#{{{
 	my $batteries = Acpi::Battery::Batteries->new;
 	my $self = {
 		'batteries'			=> $batteries->batteries,
-		'bats_number'		=> $batteries->batts_number,
+		'batts_number'		=> $batteries->batts_number,
 		'adpator'			=> $batteries->adaptor,
 		'online'			=> $batteries->online,
 		'default_battery' 	=> $batteries->batteries->[0],
@@ -49,15 +49,14 @@ sub global_values 					# Gives a global value for all batteries {{{
 {
 	my ($self, $attribute) = @_;
 
-	my $batteries		 = Acpi::Battery::Batteries->new;
-	my $batteries_names	 = $batteries->batteries;
-	my $number_batteries = $batteries->batts_number,
+	my $batteries_names	 = $self->{batteries};
+	my $number_batteries = $self->{batts_number},
 
 	my $total_value;
 	foreach my $bat (@$batteries_names) 
 	{
 		my $value = Acpi::Battery::Values->new( battery => $bat )->values->{$attribute};
-		$total_value += $value;
+		$total_value += $value if defined $value;
 	}
 
 	if ($attribute =~ /^capacity$/) 
@@ -68,6 +67,8 @@ sub global_values 					# Gives a global value for all batteries {{{
 	{ 
 		$total_value = 1 if $total_value > 1;
 	}
+
+	$total_value = "The battery does no provide attribute: $attribute" unless defined $total_value;
 
 	return $total_value;
 }#}}}

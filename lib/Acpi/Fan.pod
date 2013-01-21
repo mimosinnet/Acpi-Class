@@ -1,6 +1,26 @@
-package Acpi::Fan;
+#
+#===============================================================================
+#
+#         FILE: Fan.pm
+#
+#  DESCRIPTION: 
+#
+#        FILES: ---
+#         BUGS: ---
+#        NOTES: ---
+#       AUTHOR: mimosinnet (), mimosinnet@ningunlugar.org
+# ORGANIZATION: Associació Cultural Ningún Lugar
+#      VERSION: 1.0
+#      CREATED: 20/01/13 12:23:40
+#     REVISION: ---
+#===============================================================================
+
 use strict;
 use warnings;
+ 
+package Acpi::Fan;
+use Acpi::Field;
+use strict;
  
 our $VERSION = '0.1';
  

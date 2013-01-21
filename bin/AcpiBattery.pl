@@ -50,7 +50,7 @@ say "-" x 50;
 #}}}
 
 # Gives global information on selected values {{{
-my @global_info = qw(energy_full energy_now capacity present);
+my @global_info = qw(energy_full energy_now charge_full charge_now capacity present);
 say "Information for all batteries: ";
 print "$_ " foreach (@global_info);
 print "\n" . "-" x 40 . "\n";

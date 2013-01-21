@@ -12,6 +12,8 @@ use feature 'state';
 use Data::Dumper;
 # }}}
 
+# Batteryh information will be the same in the same session.
+# When the battery is defined, we use state to not define it again.
 sub new {#{{{
 	my $class = shift;
 	state $instance;
