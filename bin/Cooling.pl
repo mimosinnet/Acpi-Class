@@ -10,6 +10,7 @@ use Acpi::Cooling;
 # use Acpi::Battery::Values;
 use Acpi::Cooling::CoolingDevices;
 use Acpi::Cooling::Attributes;
+use Data::Dumper;
 #}}}
 
 
@@ -25,21 +26,22 @@ my $attributes 				= Acpi::Cooling::Attributes::attributes();
 
 
 ## Number of Cooling Devices (ArrayRef): {{{
-print "In your system there is/are $cooling_number cooling devices:";
+say "In your system there is/are $cooling_number cooling devices:";
 foreach (@$cooling_devices) { print " $_";}
-say "\n" . "-" x 50;
+print "\n";
 #}}}
 
-## Attributes recognized by your first cooling device {{{
-say "-" x 50;
-say "Your first cooling device is: $name_first_cooling";
-say "-" x 50 . "\n The attributes and values of $name_first_cooling are: \n" . "-" x 50;
-foreach my $attr (keys %$attributes)
+# Attributes recognized by your cooling devices {{{
+for (my $i = 0; $i < $cooling_number; $i++)
 {
-	my $value = $cooling->value($attr); 
-	say "$attr = $value" if defined $value;
+	say "-" x 50 . "\n The attributes and values of cooling device $i are:";
+	my $cooling = Acpi::Cooling->new( $i );
+	foreach my $attr (keys %$attributes)
+	{
+		my $value = $cooling->value($attr); 
+		say "$attr = $value" if defined $value;
+	}
 }
-say "-" x 50;
 ##}}}
 #
 

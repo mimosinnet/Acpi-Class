@@ -1,7 +1,9 @@
 package Acpi::Cooling;
+
+# Modules {{{
+use 5.010;
 use strict;
 use warnings;
-use 5.010;
 use Acpi::Cooling::CoolingDevices;
 use Data::Dumper;
 
@@ -12,10 +14,12 @@ $VERSION = eval $VERSION;
 #}}}
 
 
-sub new{
-    my($class) = shift;
+sub new {
+    my ($class, $cooling_device_n) = @_;
+	$cooling_device_n = 0 unless defined $cooling_device_n;
     my($self) = {
-		'cooling_number' =>  Acpi::Cooling::CoolingDevices->new()->cooling_number,
+		'cooling_number'   =>  Acpi::Cooling::CoolingDevices->new()->cooling_number,
+		'cooling_device_n' =>  $cooling_device_n,
 	};
  
     bless $self, $class;
@@ -26,9 +30,8 @@ sub new{
 sub value 							# get value {{{
 {
 	my ($self, $attribute) = @_;
-
 	my $cooling_number = $self->{cooling_number};
-	my $cooling_device_n = $self->{cooling_number_n};
+	my $cooling_device_n = $self->{cooling_device_n};
 	$cooling_device_n = 0 unless defined $cooling_device_n;
 	die "Cooling device $cooling_device_n does not exist" unless $cooling_device_n ~~ [0..$cooling_number];
 	#--- Check if attribute exist
