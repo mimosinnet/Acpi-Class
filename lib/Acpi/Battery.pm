@@ -7,6 +7,7 @@ use warnings;
 use Acpi::Battery::Batteries;
 use Acpi::Battery::Attributes;
 use Acpi::Battery::Values;
+use Acpi::Utils::Devices;
 #}}}
 
 # set version. {{{
@@ -15,12 +16,18 @@ our $VERSION = "0.200";
 $VERSION = eval $VERSION;
 #}}}
 
-sub new {#{{{
-	my $class = shift;
+sub new {#{{{   
+	my ($class, $device_n) = @_;
+    $device_n = 0 unless defined $device_n;
 	my $batteries = Acpi::Battery::Batteries->new;
 	my $self = {
+		'number'   			=>  Acpi::Utils::Devices->new
+			(
+				dir => "/sys/class/power_supply", 
+				pattern => "BAT" 
+			)->number,
+		'device_n' 			=> $device_n,
 		'batteries'			=> $batteries->batteries,
-		'batts_number'		=> $batteries->batts_number,
 		'adpator'			=> $batteries->adaptor,
 		'online'			=> $batteries->online,
 		'default_battery' 	=> $batteries->batteries->[0],
@@ -33,14 +40,16 @@ sub new {#{{{
 sub value 							# get value of a battery attribute {{{
 {
 	my ($self, $attribute) = @_;
+	my $number = $self->{number};
+	my $device_n = $self->{device_n};
+	$device_n = 0 unless defined $device_n;
+	die "Battery device $device_n does not exist" unless $device_n ~~ [0..$number];
 	#--- Check if attribute exist
-	my $attributes = $self->{attributes};
+	my $attributes = Acpi::Battery::Attributes::attributes( $device_n );
 	my %param = map { $_ => 1 } @$attributes;
-	die "The provided attribute does not exist" unless exists $param{$attribute};
+	die "The provided attribute does not exist" unless exists  $param{$attribute};
 	#---
-	my $BAT 	= $self->{battery};
-	$BAT 	||= $self->{default_battery};
-	my $battery = Acpi::Battery::Values->new( battery => $BAT);
+	my $battery = Acpi::Battery::Values->new( battery => $device_n);
 	my $value 	= $battery->values->{$attribute};
 	return $value;
 }#}}}
@@ -50,7 +59,7 @@ sub global_values 					# Gives a global value for all batteries {{{
 	my ($self, $attribute) = @_;
 
 	my $batteries_names	 = $self->{batteries};
-	my $number_batteries = $self->{batts_number},
+	my $number_batteries = $self->{number},
 
 	my $total_value;
 	foreach my $bat (@$batteries_names) 

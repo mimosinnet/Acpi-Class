@@ -15,7 +15,7 @@ use Data::Dumper;
 
 my $battery 	 		= Acpi::Battery->new;
 my $ac_online			= $battery->{'online'};
-my $default_battery		= $battery->{'default_battery'};
+my $default_battery		= Acpi::Battery::Batteries->new()->batteries->[0];
 my $battery_present		= $battery->global_values("present");
 my $battery_energy_now	= $battery->global_values("energy_now");
 my $battery_capacity	= $battery->global_values("capacity");
@@ -39,9 +39,10 @@ else
 }
 
 say "-" x 50 . "\n The attributes and values of battery $default_battery are: \n" . "-" x 50;
+my $battery_1 = Acpi::Battery->new( $default_battery );
 foreach my $attribute (@$attributes)
 {
-	my $value = $battery->value($attribute);
+	my $value = $battery_1->value($attribute);
 	say "Attribute $attribute = $value" if defined $value;
 }
 

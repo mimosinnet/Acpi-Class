@@ -22,7 +22,7 @@ sub values #{{{
 	my $self = shift;
 	my $battery = $self->{battery};
 	$battery ||= $self->{default_battery};
-	my $uevent = "/sys/class/power_supply/$battery/uevent";
+	my $uevent = "/sys/class/power_supply/BAT$battery/uevent";
 	my $content = do {
 		local @ARGV = $uevent;
 		local $/    = <ARGV>;

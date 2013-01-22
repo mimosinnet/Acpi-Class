@@ -35,7 +35,7 @@ sub batteries #{{{
 	my @bats;
 	while(readdir($power_supply_dir))
 	{
-		push @bats, $_ if ($_ =~ /BAT/);
+		push @bats, $_ =~ /BAT(.)/ if ($_ =~ /BAT/);
 	}
 	closedir($power_supply_dir);
 

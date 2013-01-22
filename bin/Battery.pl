@@ -21,7 +21,7 @@ my $batteries 			= Acpi::Battery::Batteries->new;
 my $name_first_battery 	= $batteries->batteries->[0];
 my $batteries_names		= $batteries->batteries;
 my $attributes 			= Acpi::Battery::Attributes::attributes();
-my $first_battery 		= Acpi::Battery->new( battery => $name_first_battery);
+my $first_battery 		= Acpi::Battery->new( $name_first_battery );
 # }}}
 
 # Attributes recognized by your first battery: {{{

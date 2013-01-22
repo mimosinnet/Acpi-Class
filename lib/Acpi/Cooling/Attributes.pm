@@ -6,13 +6,13 @@ use 5.010;
 sub attributes
 {
 	# Get the parameters from $dir 
-	my $cooling_device_n = shift;
-	$cooling_device_n = 0 unless defined $cooling_device_n;
-	my $dir = "/sys/class/thermal/cooling_device$cooling_device_n";
+	my $device_n = shift;
+	$device_n = 0 unless defined $device_n;
+	my $dir = "/sys/class/thermal/cooling_device$device_n";
 
-	opendir (my $cooling_device, $dir)  or die "Cannot open $dir : $!";
+	opendir (my $device, $dir)  or die "Cannot open $dir : $!";
 	my %attributes;
-	while (readdir($cooling_device))
+	while (readdir($device))
 	{
 		if (-f "$dir/$_")
 		{
