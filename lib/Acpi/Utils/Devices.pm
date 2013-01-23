@@ -8,7 +8,6 @@ use Object::Tiny::XS qw{ dir pattern };
 use Data::Dumper;
 # }}}
 
-
 sub devices #{{{
 { 
 	my $self = shift;
