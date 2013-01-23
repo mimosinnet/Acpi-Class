@@ -11,7 +11,6 @@ use Acpi::Cooling;
 use Data::Dumper;
 #}}}
 
-
 # Variables {{{
 my $cooling					= Acpi::Cooling->new;
 my $name_first_cooling 		= $cooling->{devices}->[0];
