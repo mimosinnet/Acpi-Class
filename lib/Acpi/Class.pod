@@ -1,0 +1,126 @@
+=head1 NAME 
+
+Acpi::Battery - Gives the values of your battery attributes.
+
+
+=head1 SYNOPSIS
+
+ my $battery 	 		= Acpi::Battery->new;
+ my $ac_online			= $battery->{'online'};
+ my $default_battery	= $battery->{'default_battery'};
+ my $attributes 		= $battery->{'attributes'};
+ my $battery_present	= $battery->global_values("present");
+ my $battery_energy_now	= $battery->global_values("energy_now");
+ my $battery_capacity	= $battery->global_values("capacity");
+ 
+ if ( $ac_online == 1 and $battery_present == 1 ) 
+ {
+ 	say "Ac on and battery in use ";
+ 	say "Energy now = ". $battery_energy_now ; 
+ 	say "Capacity " . $battery_capacity ." %";	
+ } 
+ elsif ($battery_present) 
+ {
+ 	say "Battery in use";
+ 	say "Energy now = ". $battery_energy_now ; 
+ 	say "Capacity " . $battery_capacity ." %";	
+ } 
+ else 
+ { 
+ 	say "Battery not present"; 
+ }
+ 
+ say "-" x 50 . "\n The attributes and values of battery $default_battery are: \n" . "-" x 50;
+ foreach my $attribute (@$attributes)
+ {
+ 	my $value = $battery->value($attribute);
+ 	say "Attribute $attribute = $value" if defined $value;
+ }
+
+
+=head1 DESCRIPTION
+
+Acpi::Battery provides battery information. It's specific for GNU/Linux, and offers similar information that tha command 'upower' using the information from F</sys/class/power_supply>. It has the following subclasses:
+
+  - Acpi::Battery::Batteries : Information on Batteries 
+  - Acpi::Battery::Values    : Value of an attribute for a particular battery
+
+It has also has a package providing the list of battery attributes:
+
+  - Acpi::Battery::Attributes: List of attributes 
+
+=head1 ATTRIBUTES
+
+Acpi::Battery provides with the following attributes:
+
+=head2 batteries
+
+ $batteries = Acpi::Battery->{batteries};
+
+ArrayRef with the name of the batteries present on the system.
+
+=head2 bats_number
+
+ $batteries = Acpi::Battery->{bats_number};
+
+Number of batteries in the system. 
+
+=head2 adaptor
+
+ $batteries = Acpi::Battery->{adaptor};
+
+Name of the ac-adaptor.
+
+=head2 online
+
+ $batteries = Acpi::Battery->{online};
+
+True if the computer is pluged in. 
+
+=head2 default_battery
+
+ $batteries = Acpi::Battery->{default_battery};
+
+Name of the first battery in the system.
+
+=head2 attributes
+
+ $batteries = Acpi::Battery->{attributes};
+
+ArrayRef of the battery attributes. The attributes of Acpi::Battery are obtained from the values in the directory F</sys/class/power_supply/>. Because these values may change, the attributes will also vary. These are obtained from the attribute 'default_battery'.
+
+=head1 METHODS
+
+Acpi::Battery provides the following methods:
+
+=head2 new
+
+ my $battery = Acpi::Battery->new( battery => 'BAT1 );
+
+Object constructor. If the 'battery' is not provided, it defaults to 'default_battery'.
+
+=head2 value
+
+ my $value = $battery->value('model_name');
+
+Gives the value of the attribute provided. It checks that the value exists. 
+
+=head2 global_values($attribute)
+
+Gives the total value or all batteries present for a particular attribute. It adds the values except:
+
+	- capacity: gives the mean of the capacity of the batteries present
+	- present : gives 1 if any of the batteries is present
+
+Example:
+
+	my $battery 	= Acpi::Battery->new;
+	my $energy_now 	= $battery->global_values('energy_now');
+	my $capacity   	= $battery->global_values('capacity');
+
+=head1 AUTHORS
+
+Version 0.1 was developed by Shy <shy@cpan.org>, and has been rewritten by Mimosinnet <mimosinet@cpan.org>.
+
+=cut
+

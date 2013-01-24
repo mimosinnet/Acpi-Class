@@ -7,33 +7,30 @@ use 5.010;
 use strict;
 use warnings;
 use Acpi::Class;
-# use Acpi::Battery::Values;
-use Data::Dumper;
 #}}}
 
-# Variables {{{
 my $class		= Acpi::Class->new;
-my $first 		= $class->{devices}->[0];
-my $devices 	= $class->{devices};
-my $number		= $class->{number};
-#my $first_battery 		= Acpi::Battery->new( battery => $name_first_battery);
-# }}}
+my $classes		= $class->g_classes;
+my $number		= @$classes;
 
-## Number of elements (ArrayRef): {{{
 say "In your system there is/are $number classes";
-foreach (@$devices) { print " $_";}
+foreach (@$classes) { print " $_";}
 print "\n";
-#}}}
 
-say "-" x 60;
-say "Your first class is $first";
+say "-" x 50 . "\n The devices in class thermal are:";
+$class->class('thermal');
+my $elements = $class->g_devices; 
+foreach (@$elements) { print "$_ "; }
+print "\n";
 
-# Elements in your class {{{
-say "-" x 50 . "\n The elements in each class are:";
-foreach my $dev (@$devices)
-{
-	my $elements = $class->devices($dev); 
-	say "Class $dev has these elements: @$elements";
-}
-#}}}
+# All values of the devices in the class 'thermal'
+$class->class('thermal');
+say "-" x 50 ;
+$class->p_class_values;
+
+# All values of the device 'cooling_device0'
+$class->device('cooling_device0');
+say "-" x 50 ;
+$class->p_device_values;
+
 

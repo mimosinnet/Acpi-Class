@@ -9,17 +9,18 @@ use lib "$Bin/../lib";
 use 5.010;
 use strict;
 use warnings;
-use Acpi::Battery;
+use Acpi::Class;
 use Data::Dumper;
 #}}}
 
-my $battery 	 		= Acpi::Battery->new;
-my $ac_online			= $battery->{'online'};
-my $default_battery		= Acpi::Battery::Batteries->new()->batteries->[0];
-my $battery_present		= $battery->global_values("present");
-my $battery_energy_now	= $battery->global_values("energy_now");
-my $battery_capacity	= $battery->global_values("capacity");
-my $attributes 			= $battery->{'attributes'};
+my $class 				= Acpi::Class->new( class => 'power_supply');
+$class->device('ADP1');
+my $ac_online 			= $class->g_values->{'online'};
+$class->device('BAT1');
+my $values 				= $class->g_values;
+my $battery_present		= $values->{'present'};
+my $battery_energy_now	= $values->{'energy_now'};
+my $battery_capacity	= $values->{'capacity'};
 
 if ( $ac_online == 1 and $battery_present == 1 ) 
 {
@@ -38,11 +39,12 @@ else
 	say "Battery not present"; 
 }
 
-say "-" x 50 . "\n The attributes and values of battery $default_battery are: \n" . "-" x 50;
-my $battery_1 = Acpi::Battery->new( $default_battery );
-foreach my $attribute (@$attributes)
-{
-	my $value = $battery_1->value($attribute);
-	say "Attribute $attribute = $value" if defined $value;
-}
+# get all values of device BAT1
+say "-" x 50;
+$class->p_device_values;
+
+say "-" x 50;
+# get all values of class power_supply
+$class->p_class_values;
+
 

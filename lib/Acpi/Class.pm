@@ -4,7 +4,9 @@ package Acpi::Class;
 use 5.010;
 use strict;
 use warnings;
-use Acpi::Utils::Devices_1;
+use Acpi::Class::Devices;
+use Acpi::Class::Attributes;
+use Object::Tiny::RW qw( class device );
 use Data::Dumper;
 # }}}
 
@@ -14,27 +16,56 @@ our $VERSION = "0.100";
 $VERSION = eval $VERSION;
 #}}}
 
-sub new {
-    my ($class, $device_n) = @_;
-	my $devices = Acpi::Utils::Devices_1->new( dir => "/sys/class", pattern => qr/\w/ );
-	$device_n = ($devices->devices->[0]) unless defined $device_n;
-    my($self) = {
-		'device_n' 	 => $device_n,
-		'devices'    => $devices->devices,
-		'number'	 => $devices->number,
-	};
- 
-    bless $self, $class;
-    return $self;
-}
-
-sub devices
+sub g_classes 						#{{{ List directories (ArrayRef)
 {
-	my ($class, $device) = @_;
-	my $elements = Acpi::Utils::Devices_1->new( dir => "/sys/class/$device", pattern => qr/\w/ )->devices;
+	my	( $par1 )	= @_;
+	my $devices = Acpi::Class::Devices->new( dir => "/sys/class", pattern => qr/\w/ )->devices;
+	return $devices;
+} 
+
+sub g_devices						#{{{ List directories (ArrayRef)
+{
+	my $self = shift;
+	my $class = $self->class;
+	my $elements = Acpi::Class::Devices->new( dir => "/sys/class/$class", pattern => qr/\w/ )->devices;
 	return \@$elements;
+}#}}}
+
+
+sub g_values						#{{{ filenames = attributes, content = values (HashRef)
+{
+	my $self = shift;
+	my ($class, $device) = ($self->class, $self->device);
+	my $values = Acpi::Class::Attributes->new( 'path' => "/sys/class/$class/$device" )->attributes;
+	return $values;
+}#}}}
+
+sub p_device_values
+{
+	my $self = shift;
+	my ($class, $device) = ($self->class, $self->device);
+	my $values = $self->g_values;
+	say "Device '$device': ";
+	foreach my $key (keys %$values)
+	{
+		my $value = $values->{$key};
+		say "   ...$key = $value";
+	}
 }
 
+sub p_class_values
+{
+	my $self = shift;
+	my $class = $self->class;
+	say "Class '$class': ";
+	my $all_devices = $self->g_devices;
+	foreach my $dev (@$all_devices)
+	{
+		$self->device($dev);
+		$self->p_device_values;
+	}
+	return 1;
+}
 
 1;
  
