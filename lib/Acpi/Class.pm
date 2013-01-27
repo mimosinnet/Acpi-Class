@@ -31,7 +31,6 @@ sub g_devices						#{{{ List directories (ArrayRef)
 	return \@$elements;
 }#}}}
 
-
 sub g_values						#{{{ filenames = attributes, content = values (HashRef)
 {
 	my $self = shift;
