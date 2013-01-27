@@ -12,16 +12,16 @@ use Data::Dumper;
 
 # set version. {{{
 # See: http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
-our $VERSION = "0.100";
+our $VERSION = "0.001";
 $VERSION = eval $VERSION;
 #}}}
 
 sub g_classes 						#{{{ List directories (ArrayRef)
 {
-	my	( $par1 )	= @_;
+	my $self 	= shift;
 	my $devices = Acpi::Class::Devices->new( dir => "/sys/class", pattern => qr/\w/ )->devices;
 	return $devices;
-} 
+} #}}} 
 
 sub g_devices						#{{{ List directories (ArrayRef)
 {
@@ -40,7 +40,7 @@ sub g_values						#{{{ filenames = attributes, content = values (HashRef)
 	return $values;
 }#}}}
 
-sub p_device_values
+sub p_device_values#{{{
 {
 	my $self = shift;
 	my ($class, $device) = ($self->class, $self->device);
@@ -51,9 +51,9 @@ sub p_device_values
 		my $value = $values->{$key};
 		say "   ...$key = $value";
 	}
-}
+}#}}}
 
-sub p_class_values
+sub p_class_values#{{{
 {
 	my $self = shift;
 	my $class = $self->class;
@@ -64,8 +64,7 @@ sub p_class_values
 		$self->device($dev);
 		$self->p_device_values;
 	}
-	return 1;
-}
+}#}}}
 
 1;
  

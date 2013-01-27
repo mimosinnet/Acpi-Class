@@ -1,10 +1,13 @@
 package Acpi::Class::Attributes;
+
+# use {{{
 use strict;
 use warnings;
 use 5.010;
 use Object::Tiny::XS qw( path );
+#}}}
 
-sub attributes
+sub attributes #{{{
 {
 	# Get the parameters from $dir 
 	my $self = shift;
@@ -21,11 +24,11 @@ sub attributes
 				local @ARGV = "$dir/$_";
 				local $/    = <ARGV>;
 			};
-			chomp $content;
+			chomp $content if defined $content;
 			$attributes{$_} = $content;
 		}
 	}
 	return \%attributes;
-}
+}#}}}
 
 1;

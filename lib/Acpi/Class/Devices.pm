@@ -25,13 +25,4 @@ sub devices #{{{
 	return \@devices;
 } #}}}
 
-sub number #{{{
-{ 
-	my $self = shift;
-	my $devices = $self->devices;
-	my $number= @$devices;
-	chomp $number;
-	return $number;
-} #}}}
-
 1;
