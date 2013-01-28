@@ -1,4 +1,7 @@
 package Acpi::Class;
+{
+  $Acpi::Class::VERSION = '0.001';
+}
 # ABSTRACT: Inspired in Acpi::Battery, this module gets the contents of the directory '/sys/class' in terms of 'classes' (ArrayRef of directories in /sys/class), 'devices' (ArrayRef of subdirectory in class) and 'attributes' (HashRef attributes => values, from the contents of devices directory).
 
 # Modules {{{
@@ -63,9 +66,7 @@ sub p_class_values    #{{{
 }#}}}
 
 1;
-
-# pod {{{
-
+ 
 __END__
 
 =pod
@@ -176,22 +177,9 @@ Prints all the attributes and values of the device BAT1.
 
 Print all the attributes and values of the devices in the class 'power_supply'.
 
-=head1 COMMUNITY
-
-Get involved: 
-
-=over 4
-
-=item * L<GitHub|https://github.com/mimosinnet/Acpi-Class>
-
-=item * L<Gitorious|https://gitorious.org/acpi-class>
-
-=back
-
 =head1 SEE ALSO
 
 L<Acpi::Battery>: gets the information from the directory F</proc/acpi>
 
 =cut
 
-# }}}
