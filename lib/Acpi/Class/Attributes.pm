@@ -1,4 +1,5 @@
 package Acpi::Class::Attributes;
+# ABSTRACT: Creates a HashRef with the filenames of a directory and its contents. 
 
 # use {{{
 use strict;
@@ -12,7 +13,7 @@ sub attributes #{{{
 {
 	# Get the parameters from $dir 
 	my $self = shift;
-	my $dir	 = $self->path;
+	my $dir  = $self->path;
 
 	opendir (my $device, $dir)  or croak "The class/device '$dir' does not exist in your system. \n";
 	my %attributes;
@@ -33,3 +34,13 @@ sub attributes #{{{
 }#}}}
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Acpi::Class::Attributes - Creates a HashRef with the filenames of a directory and its contents. 
+
+=cut

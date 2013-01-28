@@ -1,0 +1,13 @@
+
+
+This archive contains the distribution Acpi-Battery,
+version 0.001:
+
+  Gets contents of /sys/class in terms of 'classes' (directories of /sys/class), 'devices' (subdirectory of class) and 'attributes' (contents of directories.
+
+This software is copyright (c) 2013 by Mimosinnet.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+

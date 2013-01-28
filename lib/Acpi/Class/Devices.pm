@@ -1,23 +1,24 @@
 package Acpi::Class::Devices; 
+#ABSTRACT: Gives an ArrayRef with the directores in a folder.
 
 # use modules {{{
 use 5.010;
 use strict;
 use warnings;
 use Object::Tiny::XS qw{ dir pattern };
-use Data::Dumper;
+use Carp;
 # }}}
 
-sub devices #{{{
+sub devices    #{{{
 { 
 	my $self = shift;
 	my $dir     = $self->dir;
 	my $pattern = $self->pattern;
-	opendir(my $device_dir, $dir) or die "Cannot open $dir : $!";
+	opendir(my $device_dir, $dir) or croak "Cannot open $dir : $!";
 	my @devices;
 	while(readdir($device_dir))
 	{
-		push @devices, $_ if ($_ =~ /$pattern/);
+		push @devices, $_ if ($_ =~ /$pattern/x);
 	}
 	closedir($device_dir);
 
@@ -26,3 +27,13 @@ sub devices #{{{
 } #}}}
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Acpi::Class::Devices - Gives an ArrayRef with the directores in a folder.
+
+=cut
