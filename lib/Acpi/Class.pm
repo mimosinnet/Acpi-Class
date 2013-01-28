@@ -190,7 +190,7 @@ Get involved:
 
 =head1 SEE ALSO
 
-L<Acpi::Battery>: gets the information from the directory F</proc/acpi>
+The modules L<Acpi::Battery>, L<Acpi::Fan> and L<Acpi::Temperature> get the information from the directory F</proc/acpi>. This directory is deprecated in Linux kernel 2.6.24 and deleted in 2.6.39.
 
 =cut
 
