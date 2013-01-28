@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use 5.010;
 use Object::Tiny::XS qw( path );
+use Carp;
 #}}}
 
 sub attributes #{{{
@@ -13,7 +14,7 @@ sub attributes #{{{
 	my $self = shift;
 	my $dir	 = $self->path;
 
-	opendir (my $device, $dir)  or die "Cannot open $dir : $!";
+	opendir (my $device, $dir)  or croak "The class/device '$dir' does not exist in your system. \n";
 	my %attributes;
 	while (readdir($device))
 	{
