@@ -1,6 +1,6 @@
 package Acpi::Class::Attributes;
 {
-  $Acpi::Class::Attributes::VERSION = '0.001';
+  $Acpi::Class::Attributes::VERSION = '0.002';
 }
 # ABSTRACT: Creates a HashRef with the filenames of a directory and its contents. 
 

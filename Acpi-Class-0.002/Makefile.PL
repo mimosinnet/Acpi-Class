@@ -20,19 +20,20 @@ my %WriteMakefileArgs = (
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
   },
-  "DISTNAME" => "Acpi-Battery",
+  "DISTNAME" => "Acpi-Class",
   "EXE_FILES" => [],
   "LICENSE" => "perl",
-  "NAME" => "Acpi::Battery",
+  "NAME" => "Acpi::Class",
   "PREREQ_PM" => {
     "Carp" => 0,
     "Data::Dumper" => 0,
+    "List::Compare" => 0,
     "Object::Tiny::RW" => 0,
     "Object::Tiny::XS" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.001",
+  "VERSION" => "0.002",
   "test" => {
     "TESTS" => "t/*.t t/Acpi/*.t t/Acpi/Class/*.t"
   }

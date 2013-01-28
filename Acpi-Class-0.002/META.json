@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "Acpi-Battery",
+   "name" : "Acpi-Class",
    "prereqs" : {
       "configure" : {
          "requires" : {
@@ -28,6 +28,7 @@
          "requires" : {
             "Carp" : "0",
             "Data::Dumper" : "0",
+            "List::Compare" : "0",
             "Object::Tiny::RW" : "0",
             "Object::Tiny::XS" : "0",
             "perl" : "5.010",
@@ -52,7 +53,7 @@
          "web" : "https://github.com/mimosinnet/Acpi-Class"
       }
    },
-   "version" : "0.001",
+   "version" : "0.002",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.016000"
@@ -134,6 +135,17 @@
             "version" : "4.300029"
          },
          {
+            "class" : "Dist::Zilla::Plugin::Prereqs",
+            "config" : {
+               "Dist::Zilla::Plugin::Prereqs" : {
+                  "phase" : "runtime",
+                  "type" : "requires"
+               }
+            },
+            "name" : "Prereqs",
+            "version" : "4.300029"
+         },
+         {
             "class" : "Dist::Zilla::Plugin::PkgVersion",
             "name" : "PkgVersion",
             "version" : "4.300029"
@@ -146,6 +158,11 @@
          {
             "class" : "Dist::Zilla::Plugin::MetaJSON",
             "name" : "MetaJSON",
+            "version" : "4.300029"
+         },
+         {
+            "class" : "Dist::Zilla::Plugin::NextRelease",
+            "name" : "NextRelease",
             "version" : "4.300029"
          },
          {
@@ -162,11 +179,6 @@
             "class" : "Dist::Zilla::Plugin::Test::Perl::Critic",
             "name" : "Test::Perl::Critic",
             "version" : "2.112410"
-         },
-         {
-            "class" : "Dist::Zilla::Plugin::FakeRelease",
-            "name" : "FakeRelease",
-            "version" : "4.300029"
          },
          {
             "class" : "Dist::Zilla::Plugin::FinderCode",

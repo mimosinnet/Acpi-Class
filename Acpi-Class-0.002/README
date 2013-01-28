@@ -1,7 +1,7 @@
 
 
-This archive contains the distribution Acpi-Battery,
-version 0.001:
+This archive contains the distribution Acpi-Class,
+version 0.002:
 
   Inspired in Acpi::Battery, this module gets the contents of the directory '/sys/class' in terms of 'classes' (ArrayRef of directories in /sys/class), 'devices' (ArrayRef of subdirectory in class) and 'attributes' (HashRef attributes => values, from the contents of devices directory).
 

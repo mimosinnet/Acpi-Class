@@ -1,3 +1,78 @@
+package Acpi::Class;
+{
+  $Acpi::Class::VERSION = '0.002';
+}
+# ABSTRACT: Inspired in Acpi::Battery, this module gets the contents of the directory '/sys/class' in terms of 'classes' (ArrayRef of directories in /sys/class), 'devices' (ArrayRef of subdirectory in class) and 'attributes' (HashRef attributes => values, from the contents of devices directory).
+
+# Modules {{{
+use 5.010;
+use strict;
+use warnings;
+use Acpi::Class::Devices;
+use Acpi::Class::Attributes;
+use Object::Tiny::RW qw( class device );
+use Data::Dumper;
+# }}}
+
+sub g_classes    #{{{ List directories (ArrayRef)
+{
+	my $self    = shift;
+	my $devices = Acpi::Class::Devices->new( dir => "/sys/class", pattern => qr/\w/x )->devices;
+	return $devices;
+} #}}} 
+
+sub g_devices    #{{{ List directories (ArrayRef)
+{
+	my $self = shift;
+	my $class = $self->class;
+	my $elements = Acpi::Class::Devices->new( dir => "/sys/class/$class", pattern => qr/\w/x )->devices;
+	return \@$elements;
+}#}}}
+
+sub g_values    #{{{ filenames = attributes, content = values (HashRef)
+{
+	my $self = shift;
+	my ($class, $device) = ($self->class, $self->device);
+	my $values = Acpi::Class::Attributes->new( 'path' => "/sys/class/$class/$device" )->attributes;
+	return $values;
+}#}}}
+
+sub p_device_values    #{{{
+{
+	my $self = shift;
+	my ($class, $device) = ($self->class, $self->device);
+	my $values = $self->g_values;
+	say "Device '$device': ";
+	foreach my $key (keys %$values)
+	{
+		my $value = $values->{$key};
+		say "   ...$key = $value";
+	}
+	return 1
+}#}}}
+
+sub p_class_values    #{{{
+{
+	my $self = shift;
+	my $class = $self->class;
+	say "Class '$class': ";
+	my $all_devices = $self->g_devices;
+	foreach my $dev (@$all_devices)
+	{
+		$self->device($dev);
+		$self->p_device_values;
+	}
+	return 1
+}#}}}
+
+1;
+
+# pod {{{
+
+__END__
+
+=pod
+
 =head1 NAME 
 
 Acpi::Class - Gets ACPI information fom F</sys/class directory>.
@@ -104,17 +179,22 @@ Prints all the attributes and values of the device BAT1.
 
 Print all the attributes and values of the devices in the class 'power_supply'.
 
+=head1 COMMUNITY
+
+Get involved: 
+
+=over 4
+
+=item * L<GitHub|https://github.com/mimosinnet/Acpi-Class>
+
+=item * L<Gitorious|https://gitorious.org/acpi-class>
+
+=back
+
 =head1 SEE ALSO
 
-L<Acpi::Battery>: gets the information from the directory F</proc/acpi>
-
-=head1 AUTHOR
-
-Mimosinnet <mimosinet at cpan.org>
-
-=head1 LICENCSE
-
-This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+The modules L<Acpi::Battery>, L<Acpi::Fan> and L<Acpi::Temperature> get the information from the directory F</proc/acpi>. This directory is deprecated in Linux kernel 2.6.24 and deleted in 2.6.39.
 
 =cut
 
+# }}}

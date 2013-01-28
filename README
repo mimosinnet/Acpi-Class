@@ -1,8 +1,0 @@
-Inspired in Acpi::Battery, this module creates a class from the information in
-the directory /sys/class. The subdirectories of /sys/class are called "classes"
-(ArrayRef), in each "class" we can find "devices" (ArrayRef), and each "device"
-has some "attributes" and "values" (HashRef). 
-
-Please, let me know if you have some improvements or suggestions.
-
-# vim: textwidth=80
