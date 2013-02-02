@@ -2,13 +2,12 @@ package Acpi::Class;
 # ABSTRACT: Inspired in Acpi::Battery, this module gets the contents of the directory '/sys/class' in terms of 'classes' (ArrayRef of directories in /sys/class), 'devices' (ArrayRef of subdirectory in class) and 'attributes' (HashRef attributes => values, from the contents of devices directory).
 
 # Modules {{{
-use 5.010;
+use 5.012;
 use strict;
 use warnings;
 use Acpi::Class::Devices;
 use Acpi::Class::Attributes;
 use Object::Tiny::RW qw( class device );
-use Data::Dumper;
 # }}}
 
 sub g_classes    #{{{ List directories (ArrayRef)

@@ -4,7 +4,6 @@ package Acpi::Class::Attributes;
 # use {{{
 use strict;
 use warnings;
-use 5.010;
 use Object::Tiny::XS qw( path );
 use Carp;
 #}}}
@@ -19,6 +18,7 @@ sub attributes #{{{
 	my %attributes;
 	while (readdir($device))
 	{
+
 		if (-f "$dir/$_")
 		{
 			my $content = do 
